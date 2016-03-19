@@ -1,6 +1,11 @@
 defmodule Seasonal.Test do
   use ExUnit.Case, async: true
 
+  test "creating a pool" do
+    assert {:ok, pool} = Seasonal.start_link(10)
+    assert is_pid(pool)
+  end
+
   test "simple sync job" do
     {:ok, jobs} = Seasonal.start_link(10)
     ret = Seasonal.run!(jobs, fn -> 1 end, 1000)
