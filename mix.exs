@@ -1,11 +1,11 @@
-defmodule Jobspool.Mixfile do
+defmodule Seasonal.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :jobspool,
+      app: :seasonal,
       version: "0.1.0",
-      description: "Simple Elixir jobs pool",
+      description: "A worker pool written in Elixir",
       elixir: "~> 1.0",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
@@ -35,15 +35,15 @@ defmodule Jobspool.Mixfile do
       {:uuid, "~> 1.0"},
 
       {:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.8", only: :dev},
+      {:ex_doc, "~> 0.11", only: :dev},
     ]
   end
 
   defp package do
     [
-      contributors: ["Luper Rouch"],
+      contributors: ["Lee Dohm", "Luper Rouch"],
       licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/flupke/exjobspool"}
+      links: %{"Github" => "https://github.com/lee-dohm/seasonal"}
     ]
   end
 end

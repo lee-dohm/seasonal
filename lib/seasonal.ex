@@ -1,36 +1,36 @@
-defmodule JobsPool do
+defmodule Seasonal do
   @moduledoc """
   A simple concurrent jobs pool.
 
   You can spawn jobs synchronously:
 
-      {:ok, pool} = JobsPool.start_link(10)
+      {:ok, pool} = Seasonal.start_link(10)
       Enum.each 1..99, fn(_) ->
         spawn fn ->
-          JobsPool.run!(pool, fn -> :timer.sleep(100) end)
+          Seasonal.run!(pool, fn -> :timer.sleep(100) end)
         end
       end
-      JobsPool.run!(pool, fn -> :timer.sleep(100) end)
-      JobsPool.join(pool)     # Should take ~1s
+      Seasonal.run!(pool, fn -> :timer.sleep(100) end)
+      Seasonal.join(pool)     # Should take ~1s
 
-  `JobsPool.run!/4` blocks until the job is done and returns the job's
+  `Seasonal.run!/4` blocks until the job is done and returns the job's
   result, or reraise if it had an error.
 
   You can also spawn jobs asynchronously:
 
-      {:ok, pool} = JobsPool.start_link(10)
+      {:ok, pool} = Seasonal.start_link(10)
       Enum.each 1..100, fn(_) ->
-        JobsPool.async(pool, fn -> :timer.sleep(100) end)
+        Seasonal.async(pool, fn -> :timer.sleep(100) end)
       end
-      JobsPool.join(pool)     # Should take ~1s
+      Seasonal.join(pool)     # Should take ~1s
 
   There is currently no way to retrieve an async job's result.
 
-  `JobsPool.start_link/2` second argument is an array of options passed to
+  `Seasonal.start_link/2` second argument is an array of options passed to
   `GenServer.start_link/3`. For example to create a named pool:
 
-      JobsPool.start_link(10, name: :jobs_pool)
-      JobsPool.run!(:jobs_pool, fn -> :timer.sleep(100) end)
+      Seasonal.start_link(10, name: :jobs_pool)
+      Seasonal.run!(:jobs_pool, fn -> :timer.sleep(100) end)
 
   """
 
@@ -54,7 +54,7 @@ defmodule JobsPool do
   # Public API
 
   @doc """
-  Start a `JobsPool` server with `max_concurrent_jobs` execution slots.
+  Start a `Seasonal` server with `max_concurrent_jobs` execution slots.
 
   `genserver_options` is passed to `GenServer.start_link/3`.
   """

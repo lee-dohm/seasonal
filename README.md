@@ -1,8 +1,9 @@
-Jobspool
-========
+# Seasonal
 
-[![Build Status](https://travis-ci.org/flupke/exjobspool.svg?branch=master)](https://travis-ci.org/flupke/exjobspool)
+[![Build Status](https://travis-ci.org/lee-dohm/seasonal.svg?branch=master)](https://travis-ci.org/lee-dohm/seasonal)
 
-A very simple concurrent jobs pool for Elixir.
+A simple worker pool written in Elixir.
 
-Reference documentation is available at [hexdocs](http://hexdocs.pm/jobspool/).
+## Copyright
+
+Copyright &copy; 2016 by [Lee Dohm](http://www.lee-dohm.com). See [LICENSE](https://raw.githubusercontent.com/lee-dohm/package-name/master/LICENSE.md) for details.
