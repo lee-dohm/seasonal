@@ -64,46 +64,35 @@ defmodule Seasonal.Pool do
   end
 
   @doc """
-  Execute `fun` and block until it's complete, or `timeout` exceeded.
+  Queues a job in the pool.
 
-  `fun` can be an anonymous function with an arity of 0, or a `{mod, fun,
-  args}` tuple.
+  `fun` can either be an anonymous function with an arity of 0 or a
+  `{mod, fun, args}` tuple.
 
-  `key` can be used to avoid running the same job multiple times, only one job
-  with the same key can be executed or queued at any given time. If no key is
-  given, a random one is generated.
+  By default, the function is run asynchronously and no return value or other
+  information is returned to the caller. If the option `sync: true` is given,
+  the function is run synchronously and the return value and any exceptions or
+  errors are returned to the caller. If the option `sync: true` is given, an
+  optional `timeout` can be specified in milliseconds or `:infinity` to wait
+  forever.
 
-  Return `fun` return value. Throws, raises and exits are bubbled up to the
-  caller.
+  The `key` option can be specified to make a job unique. A second occurrence
+  of the same key cannot be executing or queued while the first is in the pool.
   """
-  def run!(server, fun, key \\ nil, timeout \\ :infinity)
-  def run!(server, fun, key, timeout) do
-    GenServer.call(server, {:run, fun, key}, timeout)
-    |> maybe_reraise()
-  end
+  def queue(pool, fun, options \\ [])
+  def queue(pool, fun, options) do
+    timeout = Keyword.get(options, :timeout, :infinity)
+    sync = Keyword.get(options, :sync, false)
+    key = Keyword.get(options, :key, nil)
 
-  @doc """
-  Execute `fun` asynchronously.
-
-  `fun` can be an anonymous function with an arity of 0, or a `{mod, fun,
-  args}` tuple.
-
-  `key` can be used to avoid running the same job multiple times, only one job
-  with the same key can be executed or queued at any given time. If no key is
-  given, a random one is generated.
-
-  Return the task key.
-  """
-  def async(server, fun, key \\ nil)
-  def async(server, fun, key) do
-    GenServer.call(server, {:async, fun, key})
+    queue_job(pool, fun, {sync, key, timeout})
   end
 
   @doc """
   Wait until all jobs are finished.
   """
-  def join(server, timeout \\ :infinity) do
-    GenServer.call(server, {:join}, timeout)
+  def join(pool, timeout \\ :infinity) do
+    GenServer.call(pool, {:join}, timeout)
   end
 
   # --------------------------------------------------------------------------
@@ -251,5 +240,14 @@ defmodule Seasonal.Pool do
   defp maybe_reraise({:ok, result}), do: result
   defp maybe_reraise({class, reason, stacktrace}) do
     :erlang.raise(class, reason, stacktrace)
+  end
+
+  defp queue_job(pool, fun, {true, key, timeout}) do
+    GenServer.call(pool, {:run, fun, key}, timeout)
+    |> maybe_reraise()
+  end
+
+  defp queue_job(pool, fun, {false, key, _}) do
+    GenServer.call(pool, {:async, fun, key})
   end
 end

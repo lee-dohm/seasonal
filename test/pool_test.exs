@@ -9,49 +9,56 @@ defmodule Seasonal.Pool.Test do
   end
 
   test "simple sync job" do
-    {:ok, jobs} = Pool.start_link(10)
-    ret = Pool.run!(jobs, fn -> 1 end, 1000)
+    {:ok, pool} = Pool.start_link(10)
+    ret = Pool.queue(pool, fn -> 1 end, sync: true, timeout: 1000)
+
     assert ret == 1
   end
 
   test "parallel sync jobs" do
     {:ok, agent} = Agent.start_link(fn -> 0 end)
-    {:ok, jobs} = Pool.start_link(10)
+    {:ok, pool} = Pool.start_link(10)
     increment = fn -> Agent.update(agent, &(&1 + 1)) end
+
     Enum.each 1..99, fn(_) ->
       spawn_link fn ->
-        Pool.run!(jobs, increment)
+        Pool.queue(pool, increment, sync: true)
       end
     end
-    Pool.run!(jobs, increment)
-    Pool.join(jobs)
-    assert Agent.get(agent, fn value -> value end) == 100
+
+    Pool.queue(pool, increment, sync: true)
+    Pool.join(pool)
+
+    assert Agent.get(agent, fn(value) -> value end) == 100
   end
 
-  test "parallel async jobs" do
+  test "parallel jobs" do
     {:ok, agent} = Agent.start_link(fn -> 0 end)
-    {:ok, jobs} = Pool.start_link(10)
+    {:ok, pool} = Pool.start_link(10)
     increment = fn -> Agent.update(agent, &(&1 + 1)) end
+
     Enum.each 1..100, fn(_) ->
-      Pool.async(jobs, increment)
+      Pool.queue(pool, increment)
     end
-    Pool.join(jobs)
+
+    Pool.join(pool)
+
     assert Agent.get(agent, fn value -> value end) == 100
   end
 
   test "tasks crashes bubble up to caller" do
     {:ok, jobs} = Pool.start_link(10)
     assert_raise RuntimeError, fn ->
-      Pool.run!(jobs, fn -> raise "foo" end, 1000)
+      Pool.queue(jobs, fn -> raise "foo" end, sync: true, timeout: 1000)
     end
   end
 
   test "tasks crashes don't break the pool" do
     {:ok, jobs} = Pool.start_link(10)
     assert_raise RuntimeError, fn ->
-      Pool.run!(jobs, fn -> raise "foo" end, 1000)
+      Pool.queue(jobs, fn -> raise "foo" end, sync: true, timeout: 1000)
     end
-    ret = Pool.run!(jobs, fn -> 1 end, 1000)
+    ret = Pool.queue(jobs, fn -> 1 end, sync: true, timeout: 1000)
     assert ret == 1
   end
 
@@ -60,7 +67,7 @@ defmodule Seasonal.Pool.Test do
     Enum.each 1..10, fn(_) ->
       spawn_link fn ->
         uid = UUID.uuid4()
-        returned_uid = Pool.run!(jobs, fn -> uid end, uid)
+        returned_uid = Pool.queue(jobs, fn -> uid end, key: uid, sync: true)
         assert returned_uid == uid
       end
     end
@@ -70,30 +77,30 @@ defmodule Seasonal.Pool.Test do
 
   test "tasks exits bubble up to caller" do
     {:ok, jobs} = Pool.start_link(10)
-    assert catch_exit(Pool.run!(jobs, fn -> exit 1 end)) == 1
+    assert catch_exit(Pool.queue(jobs, fn -> exit 1 end, sync: true)) == 1
   end
 
   test "tasks exits don't break the pool" do
     {:ok, jobs} = Pool.start_link(10)
-    assert catch_exit(Pool.run!(jobs, fn -> exit 1 end)) == 1
-    assert Pool.run!(jobs, fn -> 1 end) == 1
+    assert catch_exit(Pool.queue(jobs, fn -> exit 1 end, sync: true)) == 1
+    assert Pool.queue(jobs, fn -> 1 end, sync: true) == 1
   end
 
   test "tasks throws bubble up to caller" do
     {:ok, jobs} = Pool.start_link(10)
-    assert catch_throw(Pool.run!(jobs, fn -> throw 1 end)) == 1
+    assert catch_throw(Pool.queue(jobs, fn -> throw 1 end, sync: true)) == 1
   end
 
   test "tasks throws don't break the pool" do
     {:ok, jobs} = Pool.start_link(10)
-    assert catch_throw(Pool.run!(jobs, fn -> throw 1 end)) == 1
-    assert Pool.run!(jobs, fn -> 1 end) == 1
+    assert catch_throw(Pool.queue(jobs, fn -> throw 1 end, sync: true)) == 1
+    assert Pool.queue(jobs, fn -> 1 end, sync: true) == 1
   end
 
   test "exit stack is preserved" do
     {:ok, jobs} = Pool.start_link(10)
     try do
-      Pool.run!(jobs, fn -> exit 1 end)
+      Pool.queue(jobs, fn -> exit 1 end, sync: true)
     catch
       :exit, 1 ->
         stack = System.stacktrace()
@@ -109,7 +116,7 @@ defmodule Seasonal.Pool.Test do
   test "throw stack is preserved" do
     {:ok, jobs} = Pool.start_link(10)
     try do
-      Pool.run!(jobs, fn -> throw 1 end)
+      Pool.queue(jobs, fn -> throw 1 end, sync: true)
     catch
       :throw, 1 ->
         stack = System.stacktrace()
@@ -124,13 +131,13 @@ defmodule Seasonal.Pool.Test do
 
   test "mfa run! form" do
     {:ok, jobs} = Pool.start_link(10)
-    assert Pool.run!(jobs, {Pool.Test, :identity, [1]}) == 1
+    assert Pool.queue(jobs, {Pool.Test, :identity, [1]}, sync: true) == 1
   end
 
   test "mfa async form" do
     {:ok, agent} = Agent.start_link(fn -> 0 end)
     {:ok, jobs} = Pool.start_link(10)
-    Pool.async(jobs, {Pool.Test, :increment, [agent]})
+    Pool.queue(jobs, {Pool.Test, :increment, [agent]})
     Pool.join(jobs)
     assert Agent.get(agent, fn value -> value end) == 1
   end
