@@ -1,10 +1,12 @@
 defmodule Seasonal.Mixfile do
   use Mix.Project
 
+  @version File.read!(Path.expand("lib/seasonal/version.exs", __DIR__)) |> String.strip
+
   def project do
     [
       app: :seasonal,
-      version: "0.1.0",
+      version: @version,
       description: "A worker pool written in Elixir",
       elixir: "~> 1.0",
       build_embedded: Mix.env == :prod,
