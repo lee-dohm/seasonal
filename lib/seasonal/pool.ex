@@ -4,33 +4,33 @@ defmodule Seasonal.Pool do
 
   You can spawn jobs synchronously:
 
-      {:ok, pool} = Seasonal.start_link(10)
+      {:ok, pool} = Seasonal.Pool.start_link(10)
       Enum.each 1..99, fn(_) ->
         spawn fn ->
-          Seasonal.run!(pool, fn -> :timer.sleep(100) end)
+          Seasonal.Pool.run!(pool, fn -> :timer.sleep(100) end)
         end
       end
-      Seasonal.run!(pool, fn -> :timer.sleep(100) end)
-      Seasonal.join(pool)     # Should take ~1s
+      Seasonal.Pool.run!(pool, fn -> :timer.sleep(100) end)
+      Seasonal.Pool.join(pool)     # Should take ~1s
 
-  `Seasonal.run!/4` blocks until the job is done and returns the job's
+  `Seasonal.Pool.run!/4` blocks until the job is done and returns the job's
   result, or reraise if it had an error.
 
   You can also spawn jobs asynchronously:
 
-      {:ok, pool} = Seasonal.start_link(10)
+      {:ok, pool} = Seasonal.Pool.start_link(10)
       Enum.each 1..100, fn(_) ->
-        Seasonal.async(pool, fn -> :timer.sleep(100) end)
+        Seasonal.Pool.async(pool, fn -> :timer.sleep(100) end)
       end
-      Seasonal.join(pool)     # Should take ~1s
+      Seasonal.Pool.join(pool)     # Should take ~1s
 
   There is currently no way to retrieve an async job's result.
 
-  `Seasonal.start_link/2` second argument is an array of options passed to
+  `Seasonal.Pool.start_link/2` second argument is an array of options passed to
   `GenServer.start_link/3`. For example to create a named pool:
 
-      Seasonal.start_link(10, name: :jobs_pool)
-      Seasonal.run!(:jobs_pool, fn -> :timer.sleep(100) end)
+      Seasonal.Pool.start_link(10, name: :jobs_pool)
+      Seasonal.Pool.run!(:jobs_pool, fn -> :timer.sleep(100) end)
 
   """
 
@@ -54,7 +54,7 @@ defmodule Seasonal.Pool do
   # Public API
 
   @doc """
-  Start a `Seasonal` server with `max_concurrent_jobs` execution slots.
+  Start a pool with `max_concurrent_jobs` execution slots.
 
   `genserver_options` is passed to `GenServer.start_link/3`.
   """
@@ -77,10 +77,6 @@ defmodule Seasonal.Pool do
   caller.
   """
   def run!(server, fun, key \\ nil, timeout \\ :infinity)
-  def run!(server, {mod, fun, args}, key, timeout) do
-    GenServer.call(server, {:run, {mod, fun, args}, key}, timeout)
-    |> maybe_reraise()
-  end
   def run!(server, fun, key, timeout) do
     GenServer.call(server, {:run, fun, key}, timeout)
     |> maybe_reraise()
@@ -99,9 +95,6 @@ defmodule Seasonal.Pool do
   Return the task key.
   """
   def async(server, fun, key \\ nil)
-  def async(server, {mod, fun, args}, key) do
-    GenServer.call(server, {:async, {mod, fun, args}, key})
-  end
   def async(server, fun, key) do
     GenServer.call(server, {:async, fun, key})
   end
