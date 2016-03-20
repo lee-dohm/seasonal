@@ -1,39 +1,4 @@
 defmodule Seasonal.Pool do
-  @moduledoc """
-  A simple concurrent jobs pool.
-
-  You can spawn jobs synchronously:
-
-      {:ok, pool} = Seasonal.Pool.start_link(10)
-      Enum.each 1..99, fn(_) ->
-        spawn fn ->
-          Seasonal.Pool.run!(pool, fn -> :timer.sleep(100) end)
-        end
-      end
-      Seasonal.Pool.run!(pool, fn -> :timer.sleep(100) end)
-      Seasonal.Pool.join(pool)     # Should take ~1s
-
-  `Seasonal.Pool.run!/4` blocks until the job is done and returns the job's
-  result, or reraise if it had an error.
-
-  You can also spawn jobs asynchronously:
-
-      {:ok, pool} = Seasonal.Pool.start_link(10)
-      Enum.each 1..100, fn(_) ->
-        Seasonal.Pool.async(pool, fn -> :timer.sleep(100) end)
-      end
-      Seasonal.Pool.join(pool)     # Should take ~1s
-
-  There is currently no way to retrieve an async job's result.
-
-  `Seasonal.Pool.start_link/2` second argument is an array of options passed to
-  `GenServer.start_link/3`. For example to create a named pool:
-
-      Seasonal.Pool.start_link(10, name: :jobs_pool)
-      Seasonal.Pool.run!(:jobs_pool, fn -> :timer.sleep(100) end)
-
-  """
-
   use GenServer
 
   defmodule State do
