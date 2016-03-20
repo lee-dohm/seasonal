@@ -24,11 +24,19 @@ defmodule Seasonal.PoolRegistry.Test do
     assert is_pid(pool)
   end
 
-  test "removes pools on exit", %{registry: registry} do
+  test "removes pool from registry on pool exit", %{registry: registry} do
     PoolRegistry.create(registry, "foo", 10)
     {:ok, pool} = PoolRegistry.lookup(registry, "foo")
     GenServer.stop(pool)
 
     assert PoolRegistry.lookup(registry, "foo") == :error
   end
+
+  # test "pools are stopped when the registry stops", %{registry: registry} do
+  #   {:ok, pool} = PoolRegistry.create(registry, "foo", 10)
+  #   PoolRegistry.stop(registry)
+  #
+  #   refute Process.alive?(registry)
+  #   refute Process.alive?(pool)
+  # end
 end
