@@ -3,8 +3,8 @@ defmodule Seasonal.PoolRegistry.Test do
 
   alias Seasonal.PoolRegistry
 
-  setup do
-    {:ok, registry} = PoolRegistry.start_link
+  setup context do
+    {:ok, registry} = PoolRegistry.start_link(context.test)
     {:ok, registry: registry}
   end
 
