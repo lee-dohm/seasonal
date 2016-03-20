@@ -34,6 +34,7 @@ defmodule Seasonal do
 
   """
 
+  use Application
   use GenServer
 
   defmodule State do
@@ -48,6 +49,11 @@ defmodule Seasonal do
       waiters: %{},
       joiners: [],
     ]
+  end
+
+  @doc false
+  def start(_type, _args) do
+    Seasonal.Supervisor.start_link
   end
 
   # --------------------------------------------------------------------------
