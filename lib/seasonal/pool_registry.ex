@@ -32,7 +32,7 @@ defmodule Seasonal.PoolRegistry do
     if Map.has_key?(names, name) do
       {:reply, Map.fetch(names, name), {names, refs}}
     else
-      {:ok, pool} = Seasonal.start_link(size)
+      {:ok, pool} = Seasonal.Pool.start_link(size)
       ref = Process.monitor(pool)
       refs = Map.put(refs, ref, name)
       names = Map.put(names, name, pool)
