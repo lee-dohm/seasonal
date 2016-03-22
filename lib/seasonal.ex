@@ -11,8 +11,27 @@ defmodule Seasonal do
   """
   use Application
 
+  alias Seasonal.Pool
+  alias Seasonal.PoolRegistry
+
   @doc false
   def start(_type, _args) do
     Seasonal.Supervisor.start_link
+  end
+
+  def create(name, max_jobs) do
+    PoolRegistry.create(PoolRegistry, name, max_jobs)
+  end
+
+  def join(name) do
+    {:ok, pool} = PoolRegistry.lookup(PoolRegistry, name)
+    Pool.join(pool)
+  end
+
+  def lookup(name), do: PoolRegistry.lookup(PoolRegistry, name)
+
+  def queue(name, fun) do
+    {:ok, pool} = PoolRegistry.lookup(PoolRegistry, name)
+    Pool.queue(pool, fun)
   end
 end
