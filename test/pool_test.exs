@@ -3,25 +3,25 @@ defmodule Seasonal.Pool.Test do
 
   alias Seasonal.Pool
 
-  test "creating a pool of workers" do
-    assert {:ok, pool} = Pool.start_link(10)
+  setup do
+    {:ok, agent} = Agent.start_link(fn -> 0 end)
+    {:ok, pool} = Pool.start_link(10)
+
+    {:ok, agent: agent, pool: pool}
+  end
+
+  test "creating a pool of workers", %{pool: pool} do
     assert is_pid(pool)
     assert Pool.workers(pool) == 10
   end
 
-  test "queue a job" do
-    {:ok, agent} = Agent.start_link(fn -> 0 end)
-    {:ok, pool} = Pool.start_link(10)
-
+  test "queue a job", %{agent: agent, pool: pool} do
     Pool.queue(pool, fn -> update(agent) end)
 
     assert get(agent) == 5
   end
 
-  test "queue multiple jobs" do
-    {:ok, agent} = Agent.start_link(fn -> 0 end)
-    {:ok, pool} = Pool.start_link(10)
-
+  test "queue multiple jobs", %{agent: agent, pool: pool} do
     Pool.queue(pool, fn -> update(agent) end)
     Pool.queue(pool, fn -> update(agent) end)
     Pool.queue(pool, fn -> update(agent) end)
@@ -31,8 +31,7 @@ defmodule Seasonal.Pool.Test do
     assert get(agent) == 15
   end
 
-  test "queue more jobs than the pool can run at once" do
-    {:ok, agent} = Agent.start_link(fn -> 0 end)
+  test "queue more jobs than the pool can run at once", %{agent: agent} do
     {:ok, pool} = Pool.start_link(1)
 
     Pool.queue(pool, fn -> update(agent) end)
