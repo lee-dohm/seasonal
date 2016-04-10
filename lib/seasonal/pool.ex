@@ -90,9 +90,7 @@ defmodule Seasonal.Pool do
 
   defp add_joiner(state, joiner), do: update_in(state.joiners, &([joiner | &1]))
 
-  defp clear_joiners(state) do
-    put_in(state.joiners, [])
-  end
+  defp clear_joiners(state), do: put_in(state.joiners, [])
 
   defp maybe_create_key(nil), do: UUID.uuid4()
 
