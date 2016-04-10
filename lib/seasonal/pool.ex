@@ -113,7 +113,7 @@ defmodule Seasonal.Pool do
         catch
           class, reason ->
             stacktrace = System.stacktrace()
-            {key, {class, reason, stacktrace}}
+            {key, {:error, class, reason, stacktrace}}
         end
       end
 

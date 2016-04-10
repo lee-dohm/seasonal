@@ -43,6 +43,12 @@ defmodule Seasonal.Pool.Test do
     assert get(agent) == 15
   end
 
+  test "an error in a job doesn't take down the pool", %{pool: pool} do
+    Pool.queue(pool, fn -> raise ArithmeticError, message: "test" end)
+
+    assert Process.alive?(pool)
+  end
+
   defp get(agent), do: Agent.get(agent, fn(value) -> value end)
   defp update(agent), do: Agent.update(agent, fn(value) -> value + 5 end)
 end
