@@ -75,7 +75,7 @@ defmodule Seasonal.Pool do
     active_tasks = Map.values(state.active_jobs)
 
     case Task.find(active_tasks, message) do
-      {{key, result}, _task} ->
+      {{key, _result}, _task} ->
         state = state
                 |> remove_finished_job(key)
                 |> run_next_job
