@@ -25,10 +25,16 @@ defmodule Seasonal.Pool do
     GenServer.start_link(__MODULE__, state, genserver_options)
   end
 
+  @doc """
+  Wait until all jobs are finished.
+  """
   def join(pool, timeout \\ :infinity) do
     GenServer.call(pool, {:join}, timeout)
   end
 
+  @doc """
+  Queue a job.
+  """
   def queue(pool, func) do
     GenServer.call(pool, {:queue, func, nil})
   end
@@ -42,6 +48,7 @@ defmodule Seasonal.Pool do
 
   ### Server API
 
+  @doc false
   def handle_call({:join}, from, state) do
     if Map.size(state.active_jobs) > 0 or :queue.len(state.queued_jobs) > 0 do
       state = add_joiner(state, from)
@@ -63,6 +70,7 @@ defmodule Seasonal.Pool do
     {:reply, workers, state}
   end
 
+  @doc false
   def handle_info(message, state) do
     active_tasks = Map.values(state.active_jobs)
 
