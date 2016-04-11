@@ -44,7 +44,7 @@ defmodule Seasonal.Pool do
   Queue a job.
   """
   def queue(name_or_pid, func) do
-    GenServer.call(to_address(name_or_pid), {:queue, func, nil})
+    GenServer.call(to_address(name_or_pid), {:queue, func})
   end
 
   @doc """
@@ -70,8 +70,8 @@ defmodule Seasonal.Pool do
   end
 
   @doc false
-  def handle_call({:queue, func, key}, _from, state) do
-    key = maybe_create_key(key)
+  def handle_call({:queue, func}, _from, state) do
+    key = create_key
     state = run_job(state, func, key)
     {:reply, key, state}
   end
@@ -103,7 +103,7 @@ defmodule Seasonal.Pool do
 
   defp clear_joiners(state), do: put_in(state.joiners, [])
 
-  defp maybe_create_key(nil), do: UUID.uuid4()
+  defp create_key, do: UUID.uuid4()
 
   defp notify_joiners(state) do
     Enum.each(state.joiners, fn(joiner) -> GenServer.reply(joiner, :done) end)
