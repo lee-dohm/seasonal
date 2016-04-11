@@ -12,7 +12,7 @@ defmodule Seasonal.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps,
-      package: package,
+      package: package
     ]
   end
 
@@ -21,7 +21,7 @@ defmodule Seasonal.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [
-      applications: [:logger]
+      applications: [:logger, :gproc]
     ]
   end
 
@@ -36,10 +36,11 @@ defmodule Seasonal.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
+      {:gproc, "~> 0.5"},
       {:uuid, "~> 1.0"},
 
       {:earmark, "~> 0.1", only: :dev},
-      {:ex_doc, "~> 0.11", only: :dev},
+      {:ex_doc, "~> 0.11", only: :dev}
     ]
   end
 

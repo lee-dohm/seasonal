@@ -18,33 +18,44 @@ defmodule Seasonal.Pool do
   ### Client API
 
   @doc """
-  Start a pool with the given number of workers.
+  Start an unnamed pool with the given number of workers.
   """
-  def start_link(workers, genserver_options \\ []) do
+  def start_link(workers) do
     state = %State{workers: workers}
-    GenServer.start_link(__MODULE__, state, genserver_options)
+    GenServer.start_link(__MODULE__, state)
+  end
+
+  @doc """
+  Start a named pool with the given number of workers.
+  """
+  def start_link(name, workers) do
+    state = %State{workers: workers}
+    GenServer.start_link(__MODULE__, state, name: to_address(name))
   end
 
   @doc """
   Wait until all jobs are finished.
   """
-  def join(pool, timeout \\ :infinity) do
-    GenServer.call(pool, {:join}, timeout)
+  def join(name_or_pid, timeout \\ :infinity) do
+    GenServer.call(to_address(name_or_pid), {:join}, timeout)
   end
 
   @doc """
   Queue a job.
   """
-  def queue(pool, func) do
-    GenServer.call(pool, {:queue, func, nil})
+  def queue(name_or_pid, func) do
+    GenServer.call(to_address(name_or_pid), {:queue, func, nil})
   end
 
   @doc """
   Get the number of workers for the given pool.
   """
-  def workers(pool) do
-    GenServer.call(pool, :workers)
+  def workers(name_or_pid) do
+    GenServer.call(to_address(name_or_pid), :workers)
   end
+
+  defp to_address(pid) when is_pid(pid), do: pid
+  defp to_address(name), do: {:via, :gproc, {:n, :l, {:seasonal_worker_pool, name}}}
 
   ### Server API
 
