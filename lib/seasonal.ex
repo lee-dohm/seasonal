@@ -8,4 +8,9 @@ defmodule Seasonal do
   but do not crash the pool.
   """
   use Application
+
+  @doc false
+  def start(_type, _args) do
+    Seasonal.Supervisor.start_link
+  end
 end
