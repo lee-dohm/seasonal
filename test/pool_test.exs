@@ -49,6 +49,13 @@ defmodule Seasonal.Pool.Test do
     assert Process.alive?(pool)
   end
 
+  test "create a named pool" do
+    {:ok, pool} = Pool.start_link("test", 10)
+
+    assert is_pid(pool)
+    assert Pool.workers("test") == 10
+  end
+
   defp get(agent), do: Agent.get(agent, fn(value) -> value end)
   defp update(agent), do: Agent.update(agent, fn(value) -> value + 5 end)
 end
