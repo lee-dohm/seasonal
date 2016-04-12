@@ -18,7 +18,7 @@ defmodule Seasonal.Pool do
   ### Client API
 
   @doc """
-  Start an unnamed pool with the given number of workers.
+  Start an unnamed, unsupervised pool with the given number of workers.
   """
   def start_link(workers) do
     state = %State{workers: workers}
@@ -26,7 +26,7 @@ defmodule Seasonal.Pool do
   end
 
   @doc """
-  Start a named pool with the given number of workers.
+  Start a named unsupervised pool with the given number of workers.
   """
   def start_link(name, workers) do
     state = %State{workers: workers}
