@@ -54,9 +54,6 @@ defmodule Seasonal.Pool do
     GenServer.call(to_address(name_or_pid), :workers)
   end
 
-  defp to_address(pid) when is_pid(pid), do: pid
-  defp to_address(name), do: {:via, :gproc, {:n, :l, {:seasonal_worker_pool, name}}}
-
   ### Server API
 
   @doc false
@@ -155,6 +152,9 @@ defmodule Seasonal.Pool do
         end
     end
   end
+
+  defp to_address(pid) when is_pid(pid), do: pid
+  defp to_address(name), do: {:via, :gproc, {:n, :l, {:seasonal_worker_pool, name}}}
 
   defp unqueue_job(state, new_queued_jobs, key) do
     state = put_in(state.queued_jobs, new_queued_jobs)
