@@ -47,9 +47,10 @@ defmodule Seasonal.Mixfile do
 
   defp package do
     [
-      contributors: ["Lee Dohm", "Luper Rouch"],
+      contributors: ["Luper Rouch"],
       licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/lee-dohm/seasonal"}
+      links: %{"Github" => "https://github.com/lee-dohm/seasonal"},
+      maintainers: ["Lee Dohm"]
     ]
   end
 end
