@@ -1,4 +1,10 @@
 defmodule Seasonal.Pool do
+  @moduledoc """
+  Provides a set of functions for using worker pools.
+
+  Unlike the main `Seasonal` module, this module allows for working directly with
+  unnamed and unsupervised pools.
+  """
   use GenServer
 
   defmodule State do
