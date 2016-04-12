@@ -56,6 +56,12 @@ defmodule Seasonal.Pool.Test do
     assert Pool.workers("test") == 10
   end
 
+  test "stop a pool", %{pool: pool} do
+    :ok = Pool.stop(pool)
+
+    refute Process.alive?(pool)
+  end
+
   defp get(agent), do: Agent.get(agent, fn(value) -> value end)
   defp update(agent), do: Agent.update(agent, fn(value) -> value + 5 end)
 end

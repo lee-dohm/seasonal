@@ -48,10 +48,24 @@ defmodule Seasonal.Pool do
   end
 
   @doc """
+  Gets the pid of the named pool.
+  """
+  def whereis(name_or_pid) do
+    GenServer.whereis(to_address(name_or_pid))
+  end
+
+  @doc """
   Get the number of workers for the given pool.
   """
   def workers(name_or_pid) do
     GenServer.call(to_address(name_or_pid), :workers)
+  end
+
+  @doc """
+  Stops the given pool.
+  """
+  def stop(name_or_pid) do
+    GenServer.stop(to_address(name_or_pid))
   end
 
   ### Server API

@@ -22,7 +22,7 @@ defmodule Seasonal.Supervisor do
   @doc false
   def init(_) do
     children = [
-      worker(Seasonal.Pool, [])
+      worker(Seasonal.Pool, [], restart: :transient)
     ]
 
     supervise(children, strategy: :simple_one_for_one)
