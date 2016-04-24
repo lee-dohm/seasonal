@@ -26,6 +26,14 @@ defmodule Seasonal.Test do
     assert get(agent) == 5
   end
 
+  test "queue a job after some time", %{agent: agent} do
+    Seasonal.queue_after("test", fn -> update(agent) end, 200)
+    assert get(agent) == 0
+    :timer.sleep(400)
+
+    assert get(agent) == 5
+  end
+
   test "killed pools are restarted automatically" do
     pool = Seasonal.Pool.whereis("test")
 

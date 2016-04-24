@@ -28,6 +28,23 @@ defmodule Seasonal do
     Seasonal.Pool.queue(pool_name, func)
   end
 
+  @doc """
+  Queues a job on the named pool after `time` in milliseconds has passed.
+
+  Keep in mind that the job won't be inserted into the queue until after the specified amount of
+  time has passed. So if the queue already contains more jobs than it can process right away, the
+  scheduled job will have to wait even longer.
+
+  * `pool_name` - Name of the pool to execute the job on.
+  * `func` - Function to execute. This can be either an anonymous function or a `{module, function, arguments}` tuple.
+  * `time` - Amount of time to wait in milliseconds.
+
+  Returns `:ok`.
+  """
+  def queue_after(pool_name, func, time) do
+    Seasonal.Scheduler.run_after(fn -> Seasonal.Pool.queue(pool_name, func) end, time)
+  end
+
   @doc false
   def start(_type, _args) do
     Seasonal.Supervisor.start_link
