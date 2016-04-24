@@ -13,7 +13,7 @@ defmodule Seasonal do
   Creates a named, supervised pool with the specified number of concurrent workers.
   """
   def create_pool(name, workers) do
-    Seasonal.Supervisor.start_pool(name, workers)
+    Seasonal.PoolSupervisor.start_pool(name, workers)
   end
 
   @doc """
